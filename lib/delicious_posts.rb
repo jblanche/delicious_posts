@@ -13,7 +13,7 @@ last_id = 1
 Dir.glob(File.join(output_directory + ['*dailynews*'] )) do |file| 
   file_name = file.split('/').last
   file_id = file_name.scan(/\d+/).last.to_i 
-  last_id = file_id+1 if file_id > last_id
+  last_id = file_id+1 if file_id >= last_id
 end
 
 local_filename = "#{date}-dailynews_#{last_id}.textile"
