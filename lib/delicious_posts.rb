@@ -5,21 +5,35 @@ config = YAML::load(IO.read('config.yml'))['delicious']
 login = config['login']
 password = config['password']
 
-date = Date.today.to_s
+#date = '2010-01-26'#Date.today.to_s
 
-output_directory = ['/', 'Users', 'jonathanblanchet', 'dev', 'jblanche.fr', 'source', '_posts']
+output_directory = ['/', 'Users', 'jonathanB', 'projects', 'git', 'jblanche.fr', 'source', '_posts']
 last_id = 1
+last_day = '1970-01-01'
+regexp = Regexp.compile(/(\d{4}-\d{2}-\d{2})/) #2001-01-01
 
 Dir.glob(File.join(output_directory + ['*dailynews*'] )) do |file| 
   file_name = file.split('/').last
-  file_id = file_name.scan(/\d+/).last.to_i 
+  file_id = file_name.scan(/\d+/).last.to_i
   last_id = file_id+1 if file_id >= last_id
+  
+  file_day = file_name.scan(regexp).first.to_s
+  last_day = file_day if file_day > last_day
 end
 
-local_filename = "#{date}-dailynews_#{last_id}.textile"
+local_filename = "#{Date.today.to_s}-dailynews_#{last_id}.textile"
 connexion = Mirrored::Base.establish_connection(:delicious, login, password)
 
-posts = Mirrored::Post.find(:get, :dt => date)
+posts = []
+
+last_date = Date.parse(last_day) + 1
+
+last_date.step(Date.today, 1) do |date|
+  posts << Mirrored::Post.find(:get, :dt => date.to_s)
+end
+
+posts.flatten!
+
 
 header =
 %(---
